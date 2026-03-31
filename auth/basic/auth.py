@@ -1,0 +1,43 @@
+from asyncpg import Connection
+from bcrypt import checkpw, gensalt, hashpw
+from pydantic_snowflake import SnowflakeId
+
+from schemas.user import User
+from verify.email import VERIFY_MANAGER
+
+from .model import LoginOrRegisterData
+from .exceptions import AUTHORIZE_FAILED, REGISTER_FAILED
+
+
+async def check_credentials(conn: Connection, data: LoginOrRegisterData) -> tuple[SnowflakeId, bool]:
+    result = await User.get_uid_password_hash_is_admin_by_email(
+        conn=conn,
+        email=data.email
+    )
+    if result is None:
+        raise AUTHORIZE_FAILED
+
+    uid, stored_hash, is_admin = result
+
+    if not checkpw(data.password.encode(), stored_hash.encode()):
+        raise AUTHORIZE_FAILED
+
+    return uid, is_admin
+
+
+async def register_user(conn: Connection, data: LoginOrRegisterData) -> SnowflakeId:
+    if await User.exists_by_email(conn, data.email):
+        raise REGISTER_FAILED
+
+    user = User(
+        email=data.email,
+        password_hash=hashpw(data.password.encode(), gensalt()).decode()
+    )
+    await user.save(conn=conn)
+
+    await VERIFY_MANAGER.send_email(
+        uid=str(user.uid),
+        email=data.email
+    )
+
+    return user.uid

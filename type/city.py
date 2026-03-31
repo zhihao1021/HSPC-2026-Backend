@@ -1,0 +1,26 @@
+from enum import Enum
+
+
+class CityType(str, Enum):
+    TAIPEI = "臺北市"
+    NEW_TAIPEI = "新北市"
+    TAOYUAN = "桃園市"
+    TAICHUNG = "臺中市"
+    TAINAN = "臺南市"
+    KAOHSIUNG = "高雄市"
+    HSINCHU_COUNTY = "新竹縣"
+    MIAOLI_COUNTY = "苗栗縣"
+    CHANGHUA_COUNTY = "彰化縣"
+    NANTOU_COUNTY = "南投縣"
+    YUNLIN_COUNTY = "雲林縣"
+    CHIAYI_COUNTY = "嘉義縣"
+    PINGTUNG_COUNTY = "屏東縣"
+    YILAN_COUNTY = "宜蘭縣"
+    HUALIEN_COUNTY = "花蓮縣"
+    TAITUNG_COUNTY = "臺東縣"
+    PENGHU_COUNTY = "澎湖縣"
+    KINMEN_COUNTY = "金門縣"
+    LIENCHIANG_COUNTY = "連江縣"
+    KEELUNG_CITY = "基隆市"
+    HSINCHU_CITY = "新竹市"
+    CHIAYI_CITY = "嘉義市"
