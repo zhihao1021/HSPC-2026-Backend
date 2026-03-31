@@ -4,7 +4,7 @@ from pydantic_snowflake import SnowflakeId, SnowflakeGenerator
 
 from typing import Optional, overload, Self, Union
 
-from type import CityType, LunchType, UidType
+from type import CityType, LunchType, UidType, VerifyState
 
 from .base import T, UidTableModel
 
@@ -25,7 +25,7 @@ class User(UidTableModel):
     team_id: Optional[SnowflakeId] = None
     email_verified: bool = False
     student_verified: bool = False
-    verify_info: str = ""
+    verify_state: VerifyState = VerifyState.UNVERIFIED
     is_admin: bool = False
 
     @classmethod

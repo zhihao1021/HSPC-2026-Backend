@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 
 from typing import Optional
 
-from type import CityType, LunchType
+from type import CityType, LunchType, VerifyState
 
 
 class UserUpdate(BaseModel):
@@ -28,7 +28,7 @@ class UserRead(BaseModel):
     is_graduate: bool = False
     email_verified: bool = False
     student_verified: bool = False
-    verify_info: str = ""
+    verify_state: VerifyState = VerifyState.UNVERIFIED
 
     @field_validator("uid", "team_id", mode="before")
     @classmethod

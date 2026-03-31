@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     team_id BIGINT,
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     student_verified BOOLEAN NOT NULL DEFAULT FALSE,
-    verify_info TEXT NOT NULL DEFAULT '',
+    verify_state INTEGER NOT NULL DEFAULT 0,
     is_admin BOOLEAN NOT NULL DEFAULT FALSE,
 
     FOREIGN KEY (team_id) REFERENCES teams(uid) ON DELETE SET NULL
