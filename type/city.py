@@ -24,3 +24,4 @@ class CityType(str, Enum):
     KEELUNG_CITY = "基隆市"
     HSINCHU_CITY = "新竹市"
     CHIAYI_CITY = "嘉義市"
+    DASUTAO = "大石頭"

@@ -66,7 +66,7 @@ class VerifyManager():
 
         message.attach(MIMEText("".join([
             "<h1>HSPC 2026 Email 驗證</h1>",
-            "<p>請點擊連結以驗證您的電子郵件地址：</p>",
+            "<p>請於 30 分鐘內點擊連結以驗證您的電子郵件地址：</p>",
             f"<a href=\"{verify_url}\">{verify_url}</a>"
         ]), "html", "utf-8"))
 
