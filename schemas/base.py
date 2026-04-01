@@ -27,8 +27,10 @@ class TableModel(BaseModel):
 
 
 class UidTableModel(TableModel):
-    uid: SnowflakeId = Field(default=SnowflakeId(
-        0), description="The unique identifier of the record.")
+    uid: SnowflakeId = Field(
+        default=SnowflakeId(0),
+        description="The unique identifier of the record."
+    )
 
     @classmethod
     def _check_field(cls, model_cls: Optional[Type[T]], prefix: str = "") -> set[str]:
@@ -47,15 +49,19 @@ class UidTableModel(TableModel):
 
         return set([f"{prefix}{field}" for field in model_fields])
 
+    @classmethod
+    def _generate_uid(cls) -> SnowflakeId:
+        generator = _generator_map.get(cls.__table__)
+        if generator is None:
+            generator = SnowflakeGenerator()
+            _generator_map[cls.__table__] = generator
+        return generator.next()
+
     @model_validator(mode="before")
     @classmethod
     def generate_uid(cls, values: dict) -> dict:
         if "uid" not in values:
-            generator = _generator_map.get(cls.__table__)
-            if generator is None:
-                generator = SnowflakeGenerator()
-                _generator_map[cls.__table__] = generator
-            values["uid"] = generator.next()
+            values["uid"] = cls._generate_uid()
         return values
 
     async def save(self, conn: Connection) -> None:

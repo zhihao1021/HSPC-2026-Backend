@@ -1,13 +1,19 @@
 from bcrypt import checkpw, gensalt, hashpw
-from fastapi import APIRouter
+from fastapi import APIRouter, Path, UploadFile
 from pydantic_snowflake import SnowflakeId
+
+from typing import Annotated, Optional
 
 from auth import is_admin_depends, UserIdDepends
 from database import ConnDepends
+from model.sid_image import SidImageRead
 from model.user import UserRead, UserUpdate
+from schemas.sid_image import SidImage
 from schemas.user import User
+from type import SidImageType
+from verify.image_converter import ImageConverter
 
-from .exceptions import USER_NOT_FOUND, WRONG_PASSWORD
+from .exceptions import USER_NOT_FOUND, WRONG_PASSWORD, UPLOAD_IMAGE_FAILED
 
 
 router = APIRouter(
@@ -65,6 +71,37 @@ async def update_user_info(
         raise USER_NOT_FOUND
 
     return user_read
+
+
+@router.get("/sid")
+async def get_sid_image(
+    conn: ConnDepends,
+    uid: UserIdDepends,
+) -> Optional[SidImageRead]:
+    return await SidImage.get_by_user_uid(
+        conn=conn,
+        user_uid=uid,
+        model_cls=SidImageRead
+    )
+
+
+@router.put("/sid/{sid_type}")
+async def upload_sid_image(
+    conn: ConnDepends,
+    uid: UserIdDepends,
+    sid_type: Annotated[SidImageType, Path()],
+    image: UploadFile
+) -> None:
+    sid_image = await ImageConverter.convert_to_jpeg(await image.read())
+    if sid_image is None:
+        raise UPLOAD_IMAGE_FAILED
+
+    await SidImage.upsert_image_by_user_uid(
+        conn=conn,
+        user_uid=uid,
+        image_type=sid_type,
+        data=sid_image
+    )
 
 
 @router.get("/all", dependencies=[is_admin_depends])

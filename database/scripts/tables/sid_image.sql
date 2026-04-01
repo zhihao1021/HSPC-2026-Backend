@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS sid_image (
     uid BIGINT PRIMARY KEY,
-    user_uid BIGINT NOT NULL,
-    image_front BYTEA,
-    image_back BYTEA,
+    user_uid BIGINT NOT NULL UNIQUE,
+    image_front BYTEA NOT NULL DEFAULT '',
+    image_back BYTEA NOT NULL DEFAULT '',
 
     FOREIGN KEY (user_uid) REFERENCES users(uid) ON DELETE CASCADE
 );
