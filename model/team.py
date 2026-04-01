@@ -1,19 +1,19 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from typing import Optional
 
 
 class TeamCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
 
 
 class TeamUpdate(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1)
 
 
 class TeamRead(BaseModel):
     uid: str
-    name: str
+    name: str = Field(min_length=1)
 
     @field_validator("uid", mode="before")
     @classmethod

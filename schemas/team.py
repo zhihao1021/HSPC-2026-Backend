@@ -1,4 +1,5 @@
 from asyncpg import Connection
+from pydantic import Field
 
 from typing import Optional, overload, Self, Union
 
@@ -10,7 +11,7 @@ from .base import T, UidTableModel
 class Team(UidTableModel):
     __table__ = "teams"
 
-    name: str
+    name: str = Field(min_length=1)
 
     @overload
     @classmethod
@@ -59,6 +60,5 @@ class Team(UidTableModel):
         row = await conn.fetchrow(f"""
             SELECT 1 FROM {cls.__table__} WHERE name = $1
         """, name)
-
 
         return row is not None
