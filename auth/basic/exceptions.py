@@ -14,3 +14,8 @@ CF_VALIDATION_FAILED = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Cloudflare Turnstile validation failed."
 )
+
+RESEND_TOO_FREQUENT = HTTPException(
+    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+    detail="Verification email resend is too frequent. Please try again later."
+)

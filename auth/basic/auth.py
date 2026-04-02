@@ -2,11 +2,12 @@ from asyncpg import Connection
 from bcrypt import checkpw, gensalt, hashpw
 from pydantic_snowflake import SnowflakeId
 
+from schemas.email_history import EmailHistory
 from schemas.user import User
 from verify.email import VERIFY_MANAGER
 
 from .model import LoginOrRegisterData
-from .exceptions import AUTHORIZE_FAILED, REGISTER_FAILED
+from .exceptions import AUTHORIZE_FAILED, REGISTER_FAILED, RESEND_TOO_FREQUENT
 
 
 async def check_credentials(conn: Connection, data: LoginOrRegisterData) -> tuple[SnowflakeId, bool]:
@@ -35,9 +36,24 @@ async def register_user(conn: Connection, data: LoginOrRegisterData) -> Snowflak
     )
     await user.save(conn=conn)
 
+    await EmailHistory.get_email_if_can_resend(conn, user.uid)
     await VERIFY_MANAGER.send_email(
         uid=str(user.uid),
         email=data.email
     )
 
     return user.uid
+
+
+async def resend_verification_email(conn: Connection, uid: SnowflakeId) -> None:
+    if not await User.exists_by_uid(conn, uid):
+        raise AUTHORIZE_FAILED
+
+    email = await EmailHistory.get_email_if_can_resend(conn, uid)
+    if email is None:
+        raise RESEND_TOO_FREQUENT
+
+    await VERIFY_MANAGER.send_email(
+        uid=str(uid),
+        email=email
+    )

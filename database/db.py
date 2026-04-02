@@ -21,6 +21,7 @@ async def setup_database() -> None:
 
     async with _pool.acquire() as conn:
         async with conn.transaction():
+            await run_sql_command(conn, "tables", "email_history.sql")
             await run_sql_command(conn, "tables", "sid_image.sql")
             await run_sql_command(conn, "tables", "teams.sql")
             await run_sql_command(conn, "tables", "users.sql")

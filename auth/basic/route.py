@@ -7,11 +7,11 @@ from verify.cloudflare import CloudflareTurnstile
 from verify.email import VERIFY_MANAGER
 from type import ScopeType
 
-from .auth import check_credentials, register_user
+from .auth import check_credentials, register_user, resend_verification_email
 from .exceptions import CF_VALIDATION_FAILED
 from .model import LoginOrRegisterData
 from ..type import JWTPayload, JWTResponse
-from ..utils import sign_token
+from ..utils import sign_token, UserIdDepends
 
 router = APIRouter(
     prefix=""
@@ -69,3 +69,11 @@ async def verify_email(
     uid = await VERIFY_MANAGER.verify_code(conn=conn, code=code)
 
     return sign_token(JWTPayload(uid=str(uid), scopes=set([ScopeType.USE_IDENTITY])))
+
+
+@router.post("/resend-verification-email")
+async def resend_verification_email_endpoint(
+    conn: ConnDepends,
+    uid: UserIdDepends
+) -> None:
+    await resend_verification_email(conn=conn, uid=uid)
