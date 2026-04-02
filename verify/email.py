@@ -24,6 +24,8 @@ class VerifyManager():
     sender: str
     use_tls: bool = True
     external_url: str
+    discord_link: str
+    template: str
 
     def __init__(self) -> None:
         self.username = getenv("SMTP_USERNAME", "")
@@ -34,7 +36,11 @@ class VerifyManager():
         self.use_tls = getenv("SMTP_USE_TLS", "true").lower() in (
             "true", "1", "yes")
         self.external_url = getenv("VERIFY_URL", "http://localhost:8000")
+        self.discord_link = getenv("DISCORD_LINK", "")
         self.verify_code_map = {}
+
+        with open("email_template.html", "r", encoding="utf-8") as f:
+            self.template = f.read()
 
     def _send_email(self, email: str, message: str) -> None:
         if getenv("DEBUG", "false").lower() in ("true", "1", "yes"):
@@ -64,11 +70,12 @@ class VerifyManager():
         message["From"] = f"HSPC <{self.sender}>"
         message["To"] = email
 
-        message.attach(MIMEText("".join([
-            "<h1>HSPC 2026 Email 驗證</h1>",
-            "<p>請於 30 分鐘內點擊連結以驗證您的電子郵件地址：</p>",
-            f"<a href=\"{verify_url}\">{verify_url}</a>"
-        ]), "html", "utf-8"))
+        context = self.template \
+            .replace("$LINK", verify_url) \
+            .replace("$EMAIL", self.sender) \
+            .replace("$DISCORD_LINK", self.discord_link)
+
+        message.attach(MIMEText(context, "html", "utf-8"))
 
         loop = get_running_loop()
         await loop.run_in_executor(None, self._send_email, email, message.as_string())
