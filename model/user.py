@@ -29,6 +29,7 @@ class UserRead(BaseModel):
     email_verified: bool = False
     student_verified: bool = False
     verify_state: VerifyState = VerifyState.UNVERIFIED
+    is_admin: bool = False
 
     @field_validator("uid", "team_id", mode="before")
     @classmethod
