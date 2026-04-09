@@ -127,3 +127,16 @@ async def get_user_info_by_uid(
         raise USER_NOT_FOUND
 
     return user_read
+
+
+@router.get("/by-id/{uid}/sid", dependencies=[is_admin_depends])
+async def get_user_sid_image_by_uid(
+    conn: ConnDepends,
+    uid: SnowflakeId,
+) -> Optional[SidImageRead]:
+    return await SidImage.get_by_user_uid(
+        conn=conn,
+        user_uid=uid,
+        model_cls=SidImageRead
+    )
+    
