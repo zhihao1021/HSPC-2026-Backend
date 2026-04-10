@@ -100,6 +100,12 @@ class VerifyManager():
 
         return SnowflakeId(payload.uid)
 
+    def cancel_send_sid_email(self, email: str) -> None:
+        task = self.sid_pending.get(email)
+        if task:
+            task.cancel()
+            del self.sid_pending[email]
+
     async def send_sid_email(self, result: bool, email: str) -> None:
         message = MIMEMultipart("related")
         message["Subject"] = "HSPC 2026 學生證驗證通知"
@@ -120,9 +126,8 @@ class VerifyManager():
             await loop.run_in_executor(None, self._send_email, email, message.as_string())
             del self.sid_pending[email]
 
+        self.cancel_send_sid_email(email)
         loop = get_running_loop()
-        if self.sid_pending.get(email):
-            self.sid_pending[email].cancel()
         self.sid_pending[email] = loop.create_task(_send_func())
 
 
