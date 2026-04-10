@@ -37,7 +37,8 @@ async def sid_verify(
         conn=conn,
         uid=uid,
         data={
-            "verify_state": VerifyState.VERIFIED if result == "pass" else VerifyState.FAILED
+            "verify_state": VerifyState.VERIFIED if result == "pass" else VerifyState.FAILED,
+            "student_verified": result == "pass",
         }
     )
 
