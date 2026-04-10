@@ -1,7 +1,7 @@
 from asyncpg import Connection
 from pydantic_snowflake import SnowflakeId
 
-from asyncio import get_running_loop
+from asyncio import get_running_loop, sleep as asleep, Task
 from datetime import timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -25,7 +25,9 @@ class VerifyManager():
     use_tls: bool = True
     external_url: str
     discord_link: str
-    template: str
+    verify_template: str
+    sid_template: str
+    sid_pending: dict[str, Task]
 
     def __init__(self) -> None:
         self.username = getenv("SMTP_USERNAME", "")
@@ -38,9 +40,12 @@ class VerifyManager():
         self.external_url = getenv("VERIFY_URL", "http://localhost:8000")
         self.discord_link = getenv("DISCORD_LINK", "")
         self.verify_code_map = {}
+        self.sid_pending = {}
 
-        with open("email_template.html", "r", encoding="utf-8") as f:
-            self.template = f.read()
+        with open("verify_template.html", "r", encoding="utf-8") as f:
+            self.verify_template = f.read()
+        with open("sid_template.html", "r", encoding="utf-8") as f:
+            self.sid_template = f.read()
 
     def _send_email(self, email: str, message: str) -> None:
         if getenv("DEBUG", "false").lower() in ("true", "1", "yes"):
@@ -54,7 +59,7 @@ class VerifyManager():
             smtp.sendmail(self.sender, email, message)
             smtp.close()
 
-    async def send_email(self, uid: str, email: str) -> None:
+    async def send_verify_email(self, uid: str, email: str) -> None:
         token_payload = JWTPayload(
             uid=uid,
             scopes=set([ScopeType.USE_EMAIL])
@@ -70,7 +75,7 @@ class VerifyManager():
         message["From"] = f"HSPC <{self.sender}>"
         message["To"] = email
 
-        context = self.template \
+        context = self.verify_template \
             .replace("$LINK", verify_url) \
             .replace("$EMAIL", self.sender) \
             .replace("$DISCORD_LINK", self.discord_link)
@@ -94,6 +99,31 @@ class VerifyManager():
         )
 
         return SnowflakeId(payload.uid)
+
+    async def send_sid_email(self, result: bool, email: str) -> None:
+        message = MIMEMultipart("related")
+        message["Subject"] = "HSPC 2026 學生證驗證通知"
+        message["From"] = f"HSPC <{self.sender}>"
+        message["To"] = email
+
+        result_text = "<span style=\"color: green;\">成功</span>" if result else "<span style=\"color: red;\">失敗</span>"
+        context = self.sid_template \
+            .replace("$LINK", result_text) \
+            .replace("$EMAIL", self.sender) \
+            .replace("$DISCORD_LINK", self.discord_link)
+
+        message.attach(MIMEText(context, "html", "utf-8"))
+
+        async def _send_func():
+            await asleep(300)
+            loop = get_running_loop()
+            await loop.run_in_executor(None, self._send_email, email, message.as_string())
+            del self.sid_pending[email]
+
+        loop = get_running_loop()
+        if self.sid_pending.get(email):
+            self.sid_pending[email].cancel()
+        self.sid_pending[email] = loop.create_task(_send_func())
 
 
 VERIFY_MANAGER = VerifyManager()

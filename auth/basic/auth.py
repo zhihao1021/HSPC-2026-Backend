@@ -37,7 +37,7 @@ async def register_user(conn: Connection, data: LoginOrRegisterData) -> Snowflak
     await user.save(conn=conn)
 
     await EmailHistory.get_email_if_can_resend(conn, user.uid)
-    await VERIFY_MANAGER.send_email(
+    await VERIFY_MANAGER.send_verify_email(
         uid=str(user.uid),
         email=data.email
     )
@@ -53,7 +53,7 @@ async def resend_verification_email(conn: Connection, uid: SnowflakeId) -> None:
     if email is None:
         raise RESEND_TOO_FREQUENT
 
-    await VERIFY_MANAGER.send_email(
+    await VERIFY_MANAGER.send_verify_email(
         uid=str(uid),
         email=email
     )

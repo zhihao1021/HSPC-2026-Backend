@@ -34,3 +34,8 @@ UPLOAD_IMAGE_FAILED = HTTPException(
     status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
     detail="Failed to upload SID image"
 )
+
+USER_DOES_NOT_HAVE_SID_IMAGE = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="User does not have SID image"
+)

@@ -139,4 +139,3 @@ async def get_user_sid_image_by_uid(
         user_uid=uid,
         model_cls=SidImageRead
     )
-    

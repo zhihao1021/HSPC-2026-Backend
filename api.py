@@ -7,6 +7,7 @@ from typing import AsyncGenerator
 
 from auth import auth_router, KEY_STORE
 from database import setup_connection_pool
+from routes.manage import router as manage_router
 from routes.team import router as team_router
 from routes.user import router as user_router
 from verify.email import VERIFY_MANAGER
@@ -39,5 +40,6 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(manage_router)
 app.include_router(team_router)
 app.include_router(user_router)
