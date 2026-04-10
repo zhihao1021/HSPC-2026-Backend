@@ -41,4 +41,6 @@ async def sid_verify(
         }
     )
 
-    await VERIFY_MANAGER.send_sid_email(result == "pass", user.email)
+    result_id = VerifyState.VERIFIED if result == "pass" else VerifyState.FAILED
+    if result_id != user.verify_state:
+        await VERIFY_MANAGER.send_sid_email(result == "pass", user.email)
