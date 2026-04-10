@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.put("/sid_verify/{uid}/{result}")
+@router.put("/sid-verify/{uid}/{result}")
 async def sid_verify(
     conn: ConnDepends,
     uid: int,
