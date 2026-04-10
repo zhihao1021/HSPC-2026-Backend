@@ -108,7 +108,7 @@ class VerifyManager():
 
         result_text = "<span style=\"color: green;\">成功</span>" if result else "<span style=\"color: red;\">失敗</span>"
         context = self.sid_template \
-            .replace("$LINK", result_text) \
+            .replace("$RESULT", result_text) \
             .replace("$EMAIL", self.sender) \
             .replace("$DISCORD_LINK", self.discord_link)
 
