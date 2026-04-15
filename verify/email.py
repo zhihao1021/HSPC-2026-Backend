@@ -112,7 +112,8 @@ class VerifyManager():
         message["From"] = f"HSPC <{self.sender}>"
         message["To"] = email
 
-        result_text = "<span style=\"color: green;\">成功</span>" if result else "<span style=\"color: red;\">失敗</span>"
+        result_text = "<span style=\"color: green;\">成功</span>" if result \
+            else "<span style=\"color: red;\">失敗</span>，請前往官網檢查檔案是否正確上傳"
         context = self.sid_template \
             .replace("$RESULT", result_text) \
             .replace("$EMAIL", self.sender) \
